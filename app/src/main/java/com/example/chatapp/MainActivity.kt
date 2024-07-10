@@ -1,6 +1,5 @@
 package com.example.chatapp
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,9 +22,6 @@ import com.example.chatapp.presentation.Screens.SingleChatScreen
 import com.example.chatapp.presentation.Screens.SingleStatusScreen
 import com.example.chatapp.presentation.Screens.StatusScreen
 import com.example.chatapp.ui.theme.ChatAppTheme
-import com.permissionx.guolindev.PermissionX
-import com.permissionx.guolindev.callback.ExplainReasonCallback
-import com.permissionx.guolindev.callback.RequestCallback
 import dagger.hilt.android.AndroidEntryPoint
 
 //creating routes for navigation
@@ -47,7 +42,7 @@ sealed class DestinationScreens(var route: String){
     }
 }
 @AndroidEntryPoint
-class MainActivity : FragmentActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -61,17 +56,6 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
-    }
-    private fun callPermission(){
-        // need a activityContext.
-        // need a activityContext.
-        val request = PermissionX.init(this).permissions(Manifest.permission.SYSTEM_ALERT_WINDOW)
-            .onExplainRequestReason(ExplainReasonCallback { scope, deniedList ->
-                val message =
-                    "We need your consent for the following permissions in order to use the offline call function properly"
-                scope.showRequestReasonDialog(deniedList, message, "Allow", "Deny")
-            }).request(RequestCallback { allGranted, grantedList, deniedList -> })
-
     }
 }
 
