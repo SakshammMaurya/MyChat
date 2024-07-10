@@ -6,9 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -69,13 +73,35 @@ fun SingleChatScreen(
     }
 
     Column {
-        ChatHeader(name = chatUser.name ?: "", imageUrl = chatUser.imageUrl ?: "") {
-            navController.popBackStack()
-            vm.dePopulateMessage()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+          //  horizontalArrangement = Arrangement.,
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            ChatHeader(name = chatUser.name ?: "",
+                imageUrl = chatUser.imageUrl ?: "") {
+                navController.popBackStack()
+                vm.dePopulateMessage()
 
-
+            }
+            Spacer(modifier = Modifier.width(80.dp))
+            Icon(imageVector = Icons.Default.Call,
+                contentDescription = "voice call",
+                tint = Color.White,
+                modifier = Modifier.padding(8.dp).clickable {
+                    ////
+                })
+            Icon(imageVector = Icons.Default.Call,
+                contentDescription = "video call",
+                tint = Color.White,
+                modifier = Modifier.clickable {
+                    ////
+                })
 
         }
+
         //  Text(text = vm.chatMessages.value.toString())
         MessageBox(
             modifier = Modifier.weight(1f),
@@ -120,12 +146,11 @@ fun ReplyBox(
 fun ChatHeader(
     name: String,
     imageUrl: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
             .wrapContentHeight()
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically

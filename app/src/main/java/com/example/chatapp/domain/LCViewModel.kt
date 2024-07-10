@@ -1,5 +1,6 @@
 package com.example.chatapp.domain
 
+import android.Manifest
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -22,10 +23,14 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.toObjects
 import com.google.firebase.storage.FirebaseStorage
+import com.permissionx.guolindev.PermissionX
+import com.permissionx.guolindev.callback.ExplainReasonCallback
+import com.permissionx.guolindev.callback.RequestCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
+
 
 @HiltViewModel
 class LCViewModel @Inject constructor(
@@ -380,6 +385,12 @@ class LCViewModel @Inject constructor(
         }
        // inProgressStatus.value = false
     }
+
+    fun initializeCall(uid: String, name: String){
+        val appId = 2030862703
+
+    }
+
 
 
 }
