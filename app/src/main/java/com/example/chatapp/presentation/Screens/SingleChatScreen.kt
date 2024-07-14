@@ -87,7 +87,9 @@ fun SingleChatScreen(
         Row (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(8.dp)
+
+            ,
             verticalAlignment = Alignment.CenterVertically,
         ){
 

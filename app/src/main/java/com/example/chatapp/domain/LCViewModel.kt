@@ -62,7 +62,9 @@ class LCViewModel @Inject constructor(
         signIn.value = currentUser != null
         currentUser?.uid?.let {
             getUserData(it)
+
         }
+
     }
 
     fun handleException(exception: Exception? = null, customMessage: String = "") {
@@ -131,7 +133,6 @@ class LCViewModel @Inject constructor(
         eventMutableState.value = Event("Logged out")
 
     }
-
     fun createOrUpdateProfile(
         name: String? = null,
         number: String? = null,
@@ -169,7 +170,6 @@ class LCViewModel @Inject constructor(
                     inProcess.value = false
                 }
         }
-
     }
 
     fun uploadProfileImage(uri: Uri) {
@@ -211,6 +211,14 @@ class LCViewModel @Inject constructor(
         }
 
     }
+     fun DeleteChat(
+         chatId: String
+     ){
+          db.collection(CHATS).document(chatId).delete().addOnFailureListener {
+              handleException(it)
+          }
+
+     }
 //    private fun getReceiverData(uid: String) {
 //        inProcess.value = true
 //        db.collection(USER_NODE).document(uid).addSnapshotListener { value, error ->

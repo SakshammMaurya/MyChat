@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -39,6 +40,8 @@ import com.example.chatapp.DestinationScreens
 import com.example.chatapp.R
 import com.example.chatapp.Util.CommonProgressBar
 import com.example.chatapp.Util.CommonRow
+import com.example.chatapp.Util.CommonRowDeletable
+import com.example.chatapp.Util.SwipeToDelete
 import com.example.chatapp.Util.TitleText
 import com.example.chatapp.Util.navigateTo
 import com.example.chatapp.domain.LCViewModel
@@ -49,7 +52,7 @@ fun ChatListScreen(navController: NavController, vm: LCViewModel) {
     if (inProgress.value) {
         CommonProgressBar()
     } else {
-        val chats = vm.chats.value
+        var chats =  mutableStateOf(vm.chats.value)
         val userData = vm.userData.value
         val showDialog = remember {
             mutableStateOf(false)
@@ -68,70 +71,91 @@ fun ChatListScreen(navController: NavController, vm: LCViewModel) {
                     onDismiss = onDismiss,
                     onAddChat = onAddChat
                 )
-            },
-            content = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                ) {
-                    TitleText(txt = "Chats")
-                    if (chats.isEmpty()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.start),
-                                contentDescription = null,
-                            )
-                            Text(
-                                text = "Start Chatting",
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Message privately with your Contacts",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = Color.Gray
-                            )
-                        }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            items(chats) { chat ->
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
+                TitleText(txt = "Chats")
+                if (chats.value.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.start),
+                            contentDescription = null,
+                        )
+                        Text(
+                            text = "Start Chatting",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Message privately with your Contacts",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        items(
+                            items = chats.value,
+                        ) { chat ->
 
-                                val chatUser = if (chat.user1.userId == userData?.userId) {
-                                    chat.user2
-                                } else {
-                                    chat.user1
-                                }
-                                CommonRow(imageUrl = chatUser.imageUrl, name = chatUser.name) {
+                            val chatUser = if (chat.user1.userId == userData?.userId) {
+                                chat.user2
+                            } else {
+                                chat.user1
+                            }
 
+                            CommonRowDeletable(
+                                imageUrl = chatUser.imageUrl,
+                                name = chatUser.name,
+                                item = chats,
+                                onDelete = {
+                                           // chats -= chat
+                                            vm.DeleteChat(chatId = chat.chatId.toString())
+                                            chats.value -= chat
+
+                                           },
+                                onItemClick = {
                                     chat.chatId?.let {
                                         navigateTo(
                                             navController,
                                             DestinationScreens.SingleChat.createRoute(id = it)
                                         )
                                     }
-
                                 }
+                            )
+//                            CommonRow(imageUrl = chatUser.imageUrl, name = chatUser.name) {
+//
+//                                chat.chatId?.let {
+//                                    navigateTo(
+//                                        navController,
+//                                        DestinationScreens.SingleChat.createRoute(id = it)
+//                                    )
+//                                }
+//
+//                            }
 
-                            }
                         }
                     }
-                    BottomNavigationMenu(
-                        selectedItem = BottomNavigationItem.CHATLIST,
-                        navController = navController
-                    )
                 }
+                BottomNavigationMenu(
+                    selectedItem = BottomNavigationItem.CHATLIST,
+                    navController = navController
+                )
             }
-        )
+        }
 
     }
 
@@ -172,7 +196,6 @@ fun FAB(
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-
             }
         )
     }

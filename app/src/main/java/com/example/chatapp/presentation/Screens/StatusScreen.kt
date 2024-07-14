@@ -36,11 +36,9 @@ import com.example.chatapp.domain.LCViewModel
 @SuppressLint("SuspiciousIndentation", "LogNotTimber")
 @Composable
 fun StatusScreen(navController: NavController, vm: LCViewModel) {
-
     val inProcess = vm.inProcess
     if (inProcess.value) {
         CommonProgressBar()
-        Text(text = "Status is Loading")   //added my own
     } else {
         val statuses = vm.status.value
         val userData = vm.userData.value
@@ -51,13 +49,13 @@ fun StatusScreen(navController: NavController, vm: LCViewModel) {
         val otherStatus = statuses.filter {
             it.user.userId != userData?.userId
         }
-        Log.d("Statuses",statuses.size.toString())
-        Log.d("myStatuses",myStatus.size.toString())
-        Log.d("otherStatuses",otherStatus.size.toString())
+        Log.d("Statuses", statuses.size.toString())
+        Log.d("myStatuses", myStatus.size.toString())
+        Log.d("otherStatuses", otherStatus.size.toString())
 
         val launcher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
-            ) { uri ->
+        ) { uri ->
             uri?.let {
                 vm.uploadStatus(uri)
             }
@@ -90,30 +88,29 @@ fun StatusScreen(navController: NavController, vm: LCViewModel) {
                     if (myStatus.isNotEmpty()) {
                         CommonRow(
                             imageUrl = myStatus[0].user.imageUrl,
-                            name = myStatus[0].user.name
+                            name = myStatus[0].user.name,
                         ) {
                             navigateTo(
                                 navController,
                                 DestinationScreens.SingleStatus.createRoute(myStatus[0].user.userId!!)
                             )
-
                         }
                     }
                     // CommonDivider()
-                       val uniqueUsers = otherStatus.map { it.user }.toSet().toList()
-                      Log.d("uniqueUser",uniqueUsers.size.toString())
-                        LazyColumn(modifier = Modifier.weight(1f)) {
-                            items(uniqueUsers) { user ->
-                                CommonRow(
-                                    imageUrl = user.imageUrl, name = user.name
-                                ) {
-                                    navigateTo(
-                                        navController,
-                                        DestinationScreens.SingleStatus.createRoute(user.userId!!)
-                                    )
-                                }
+                    val uniqueUsers = otherStatus.map { it.user }.toSet().toList()
+                    Log.d("uniqueUser", uniqueUsers.size.toString())
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        items(uniqueUsers) { user ->
+                            CommonRow(
+                                imageUrl = user.imageUrl, name = user.name
+                            ) {
+                                navigateTo(
+                                    navController,
+                                    DestinationScreens.SingleStatus.createRoute(user.userId!!)
+                                )
                             }
                         }
+                    }
 
                 }
                 BottomNavigationMenu(
