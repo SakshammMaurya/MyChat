@@ -13,6 +13,19 @@ data class UserData(
         "imageUrl" to imageUrl
     )
 }
+data class ReceiverData(
+    var receiverId : String?="",
+    var receiverName : String?="",
+    var receiverNumber : String?="",
+    var receiverImageUrl : String?=""
+){
+    fun toMap() = mapOf(
+        "receiverId" to receiverId,
+        "receiverName" to receiverName,
+        "receiverNumber" to receiverNumber,
+        "receiverImageUrl" to receiverImageUrl
+    )
+}
 
 data class ChatData(
     val chatId: String?="",

@@ -1,16 +1,21 @@
 package com.example.chatapp.domain
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Application
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
+import com.example.chatapp.MainActivity
 import com.example.chatapp.data.CHATS
 import com.example.chatapp.data.ChatData
 import com.example.chatapp.data.ChatUser
 import com.example.chatapp.data.Event
 import com.example.chatapp.data.MESSAGE
 import com.example.chatapp.data.Message
+import com.example.chatapp.data.ReceiverData
 import com.example.chatapp.data.STATUS
 import com.example.chatapp.data.Status
 import com.example.chatapp.data.USER_NODE
@@ -22,6 +27,11 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.toObjects
 import com.google.firebase.storage.FirebaseStorage
+import com.permissionx.guolindev.PermissionX
+import com.permissionx.guolindev.callback.ExplainReasonCallback
+import com.permissionx.guolindev.callback.RequestCallback
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService
+import com.zegocloud.uikit.prebuilt.call.invite.ZegoUIKitPrebuiltCallInvitationConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Calendar
 import java.util.UUID
@@ -34,12 +44,12 @@ class LCViewModel @Inject constructor(
     val storage: FirebaseStorage
 ) : ViewModel() {
 
-
     var inProcess = mutableStateOf(false)
     var inProcessChats = mutableStateOf(false)
     val eventMutableState = mutableStateOf<Event<String>?>(null)
     var signIn = mutableStateOf(false)
     var userData = mutableStateOf<UserData?>(null)
+    var receiverData = mutableStateOf<ReceiverData?>(null)
     val chats = mutableStateOf<List<ChatData>>(listOf())
     var chatMessages = mutableStateOf<List<Message>>(listOf())
     val inProgressChatMessage = mutableStateOf(false)
@@ -47,7 +57,6 @@ class LCViewModel @Inject constructor(
 
     val status = mutableStateOf<List<Status>>(listOf())
     val inProgressStatus = mutableStateOf(false)
-
     init {
         val currentUser = auth.currentUser
         signIn.value = currentUser != null
@@ -202,6 +211,20 @@ class LCViewModel @Inject constructor(
         }
 
     }
+//    private fun getReceiverData(uid: String) {
+//        inProcess.value = true
+//        db.collection(USER_NODE).document(uid).addSnapshotListener { value, error ->
+//            if (error != null) {
+//                handleException(error, "Cannot retrieve user")
+//            }
+//            if (value != null) {
+//                val receiver = value.toObject<ReceiverData>()
+//                receiverData.value = receiver
+//                inProcess.value = false
+//            }
+//        }
+//
+//    }
 
     fun onAddChat(number: String) {
         if (number.isEmpty() or !number.isDigitsOnly()) {
@@ -227,7 +250,6 @@ class LCViewModel @Inject constructor(
                             if (it.isEmpty()) {
                                 handleException(customMessage = "Number not found")
                             } else {
-
                                 val chatPartner = it.toObjects<UserData>()[0]
                                 val id = db.collection(CHATS).document().id
                                 val chat = ChatData(
@@ -245,6 +267,7 @@ class LCViewModel @Inject constructor(
                                         chatPartner.number,
                                     )
                                 )
+                                receiverData.value?.receiverId = chat.user2.userId
                                 db.collection(CHATS).document(id).set(chat)
 
 
@@ -283,6 +306,7 @@ class LCViewModel @Inject constructor(
             }
         }
     }
+
 
     fun populateMessages(
         chatId: String,
@@ -338,16 +362,17 @@ class LCViewModel @Inject constructor(
         db.collection(STATUS).document().set(newStatus)
     }
 
+    @SuppressLint("LogNotTimber")
     fun populateStatuses() {
         val timeDelta = 24L *60*60*1000
         val cutOff = System.currentTimeMillis()-timeDelta
 
-        inProcess.value = true;
+        inProcess.value = true
         inProgressStatus.value = true
         db.collection(CHATS).where(
             Filter.or(
                 Filter.equalTo("user1.userId", userData.value?.userId),
-                Filter.equalTo("user2.userId", userData.value?.userId),
+                Filter.equalTo("user2.userId", userData.value?.userId)
             )
         ).addSnapshotListener { value, error ->
             if (error != null) {
@@ -356,6 +381,7 @@ class LCViewModel @Inject constructor(
             if (value != null) {
                 val currentConnections = arrayListOf(userData.value?.userId)
                 val chats = value.toObjects<ChatData>()
+                Log.d("populated", currentConnections.toString())
                 chats.forEach { chat ->
                     if (chat.user1.userId == userData.value?.userId) {
                         currentConnections.add(chat.user2.userId)
@@ -363,19 +389,22 @@ class LCViewModel @Inject constructor(
                         currentConnections.add(chat.user1.userId)
                     }
                 }
+                       // Log.d("currentConnections",currentConnections.size.toString())
 
-                db.collection(STATUS).whereGreaterThan("timestamp",cutOff).whereIn("user.userId", currentConnections)
-                    .addSnapshotListener { value, error ->
-                    if(error!=null){
+                //   whereGreaterThan("timestamp",cutOff).
+                db.collection(STATUS).whereIn("user.userId", currentConnections)
+                    .addSnapshotListener { value1, error1 ->
+                        Log.d("statusValue",value1?.size().toString())
+                    if(error1!=null){
                         handleException(error)
                     }
-                    if(value!=null){
-                        status.value=value.toObjects()
+                    if(value1!=null){
+                        status.value = value1.toObjects()   //object type Status by my own
                         inProcess.value = false
                         inProgressStatus.value=false
+                        //Log.d("statusValue", status.value.toString())
                     }
                     }
-
             }
         }
        // inProgressStatus.value = false

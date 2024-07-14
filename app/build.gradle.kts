@@ -14,8 +14,9 @@ android {
 
     defaultConfig {
         applicationId = "com.example.chatapp"
-        minSdk = 29
-        targetSdk = 34
+        minSdk = 26
+        //noinspection ExpiredTargetSdkVersion
+        targetSdk = 32
         versionCode = 1
         versionName = "1.0"
 
@@ -56,6 +57,7 @@ android {
 
 dependencies {
 
+    val appcompat_version ="1.7.0"
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
     implementation("androidx.activity:activity-compose:1.9.0")
@@ -93,4 +95,14 @@ dependencies {
 
     //coil
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    //zegocloud
+    implementation ("com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+")
+
+    implementation("androidx.appcompat:appcompat:$appcompat_version")
+    // For loading and tinting drawables on older versions of the platform
+    implementation("androidx.appcompat:appcompat-resources:$appcompat_version")
+
+    //stream SDK
+   // implementation("io.getstream:stream-video-android-ui-compose:<1.0.11>")
 }

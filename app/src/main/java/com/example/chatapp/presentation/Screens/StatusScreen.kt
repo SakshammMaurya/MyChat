@@ -1,5 +1,7 @@
 package com.example.chatapp.presentation.Screens
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -31,12 +33,14 @@ import com.example.chatapp.Util.TitleText
 import com.example.chatapp.Util.navigateTo
 import com.example.chatapp.domain.LCViewModel
 
+@SuppressLint("SuspiciousIndentation", "LogNotTimber")
 @Composable
 fun StatusScreen(navController: NavController, vm: LCViewModel) {
 
     val inProcess = vm.inProcess
     if (inProcess.value) {
         CommonProgressBar()
+        Text(text = "Status is Loading")   //added my own
     } else {
         val statuses = vm.status.value
         val userData = vm.userData.value
@@ -47,10 +51,12 @@ fun StatusScreen(navController: NavController, vm: LCViewModel) {
         val otherStatus = statuses.filter {
             it.user.userId != userData?.userId
         }
+        Log.d("Statuses",statuses.size.toString())
+        Log.d("myStatuses",myStatus.size.toString())
+        Log.d("otherStatuses",otherStatus.size.toString())
 
         val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent(),
-
+            contract = ActivityResultContracts.GetContent()
             ) { uri ->
             uri?.let {
                 vm.uploadStatus(uri)
@@ -92,10 +98,10 @@ fun StatusScreen(navController: NavController, vm: LCViewModel) {
                             )
 
                         }
-                        CommonDivider()
-
-                        val uniqueUsers = otherStatus.map { it.user }.toSet().toList()
-
+                    }
+                    // CommonDivider()
+                       val uniqueUsers = otherStatus.map { it.user }.toSet().toList()
+                      Log.d("uniqueUser",uniqueUsers.size.toString())
                         LazyColumn(modifier = Modifier.weight(1f)) {
                             items(uniqueUsers) { user ->
                                 CommonRow(
@@ -108,7 +114,7 @@ fun StatusScreen(navController: NavController, vm: LCViewModel) {
                                 }
                             }
                         }
-                    }
+
                 }
                 BottomNavigationMenu(
                     selectedItem = BottomNavigationItem.STATUSLIST,
